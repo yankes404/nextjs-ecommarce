@@ -11,3 +11,8 @@ export const getProductById = async (id: string) => {
     const product = await prisma.product.findUnique({ where: { id } });
     return product;
 }
+
+export const getProductsByIds = async (ids: string[]) => {
+    const products = await prisma.product.findMany({ where: { id: { in: ids } } });
+    return products;
+}

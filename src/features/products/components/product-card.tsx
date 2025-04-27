@@ -17,9 +17,9 @@ export const ProductCard = ({
                 <Image
                     src={images[0]}
                     alt={name}
-                    width={300}
-                    height={300}
-                    className="w-full aspect-square object-cover rounded-lg"
+                    width={512}
+                    height={512}
+                    className="w-full aspect-square object-cover object-center"
                 />
             )}
             <div className="grid gap-1">

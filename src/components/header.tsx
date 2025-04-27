@@ -4,6 +4,7 @@ import { ShoppingCartIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 import { Button } from "./ui/button";
+import { ShoppingCart } from "@/features/products/components/shopping-cart";
 
 type Props = Omit<React.ComponentProps<"header">, "children">;
 
@@ -19,12 +20,14 @@ export const Header = ({ className, ...props }: Props) => {
             >
                 BuyAnything
             </Link>
-            <Button
-                size="icon"
-                variant="outline"
-            >
-                <ShoppingCartIcon />
-            </Button>
+            <ShoppingCart>
+                <Button
+                    size="icon"
+                    variant="outline"
+                >
+                    <ShoppingCartIcon />
+                </Button>
+            </ShoppingCart>
         </header>
     )
 }
