@@ -1,0 +1,1 @@
+export type StripePaymentStatus = "complete" | "expired" | "open";

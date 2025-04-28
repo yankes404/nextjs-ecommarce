@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 
 import { useShoppingCart } from "../hooks/use-shopping-cart";
 import { ShoppingCartProductCard } from "./shopping-cart-product-card";
+import { useCreateCheckoutSession } from "@/features/payments/api/use-create-checkout-session";
 
 interface Props {
     children: React.ReactNode;
@@ -12,6 +13,8 @@ interface Props {
 
 export const ShoppingCart = ({ children }: Props) => {
     const { products } = useShoppingCart();
+
+    const { mutate: createCheckoutSession, isPending } = useCreateCheckoutSession();
 
     return (
         <Sheet>
@@ -34,7 +37,8 @@ export const ShoppingCart = ({ children }: Props) => {
                     <p className="text-sm">Total: <span className="font-semibold">${products.reduce((acc, curr) => acc + curr.price, 0).toLocaleString("en-US")}</span></p>
                     <Button
                         size="lg"
-                        disabled={products.length === 0}
+                        disabled={products.length === 0 || isPending}
+                        onClick={() => createCheckoutSession(products)}
                     >
                         Go to Checkout
                     </Button>
