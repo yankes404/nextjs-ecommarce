@@ -1,11 +1,13 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
+import { SessionProvider } from "next-auth/react";
 import { Inter } from "next/font/google";
 
 import { cn } from "@/lib/utils"; 
 import { Toaster } from "@/components/ui/sonner";
+import { QueryProvider } from "@/components/query-provider";
 
 import "./globals.css";
-import { QueryProvider } from "@/components/query-provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,15 +22,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <QueryProvider>
-      <html lang="en-US">
-        <body
-          className={cn(inter.className, "antialiased")}
-        >
-          <Toaster />
-          {children}
-        </body>
-      </html>
-    </QueryProvider>
+    <SessionProvider>
+      <Suspense>
+        <QueryProvider>
+          <html lang="en-US">
+            <body
+              className={cn(inter.className, "antialiased")}
+            >
+              <Toaster />
+              {children}
+            </body>
+          </html>
+        </QueryProvider>
+      </Suspense>
+    </SessionProvider>
   );
 }
