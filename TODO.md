@@ -10,3 +10,6 @@
 - Add reset password functionality
 - Add user settings
 - Add google oauth
+
+# Orders
+- Add more details to order e.g. shipping or deliveredAt

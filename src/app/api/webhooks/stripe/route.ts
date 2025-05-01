@@ -1,4 +1,5 @@
 import { getProductsByStripeIds } from "@/features/products/actions";
+import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 
@@ -26,10 +27,16 @@ export const POST = async (req: NextRequest) => {
                     expand: ["line_items"]
                 }
             );
+
+            console.log(session);
     
-            // const customerEmail = session.customer_email;
+            const customerEmail = session.customer_email ?? session.customer_details?.email;
             const lineItems = session.line_items?.data;
 
+            if (!customerEmail) {
+                throw new Error("No customer email");
+            }
+            
             if (!lineItems) {
                 throw new Error("No line items");
             }
@@ -47,6 +54,13 @@ export const POST = async (req: NextRequest) => {
             // TODO: Send an email to the customer
             // TODO: Send an email to me
             // TODO: For future use shippo to sumulate shipping
+            
+            await prisma.order.create({
+                data: {
+                    customerEmail,
+                    products: { connect: products.map((product) => ({ id: product.id })) }
+                }
+            })
 
             return NextResponse.json({ success: true }, { status: 200 });
         }

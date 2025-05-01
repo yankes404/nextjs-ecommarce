@@ -3,13 +3,18 @@
 import Stripe from 'stripe';
 import { Product } from '@prisma/client';
 
+import { auth } from '@/auth';
+
 import { StripePaymentStatus } from './types';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export const createCheckoutSession = async (products: Product[], currentUrl = "/") => {
     try {
+        const authSession = await auth();
+
         const session = await stripe.checkout.sessions.create({
+            customer_email: authSession?.user?.email ?? undefined,
             payment_method_types: ["card"],
             line_items: products.map((product) => ({
                 price: product.stripeId,
