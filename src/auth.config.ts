@@ -32,4 +32,27 @@ export default {
             }
         })
     ],
+    callbacks: {
+        jwt({ token, trigger, session }) {
+            if (trigger === "update") {
+                // console.log(session);
+
+                if (session.email) {
+                    token.email = session.email;
+                }
+                if (session.name) {
+                    token.name = session.name;
+                }
+            }
+
+            return token;
+        },
+        session({ session, token }) {
+            if (token && token.sub) {
+                session.user.id = token.sub;
+            }
+
+            return session;
+        }
+    }
 } satisfies NextAuthConfig

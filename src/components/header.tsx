@@ -26,39 +26,39 @@ export const Header = ({ className, ...props }: Props) => {
             >
                 BuyAnything
             </Link>
-                <div className="flex">
-                    {session && session.user ? <UserButton /> : (
-                        <>
-                            <Button className="mr-2" asChild>
-                                <Link href="/sign-in">
-                                    <span className="hidden md:inline">
-                                        Sign in
-                                    </span>
-                                    <LogInIcon className="md:hidden" />
-                                    <span className="sr-only md:hidden">Sign ins</span>
-                                </Link>
-                            </Button>
-                            <Button variant="ghost" asChild>
-                                <Link href="/sign-up">
-                                    <span className="hidden md:inline">
-                                        Sign up
-                                    </span>
-                                    <UserPlusIcon className="md:hidden" />
-                                    <span className="sr-only md:hidden">Sign up</span>
-                                </Link>
-                            </Button>
-                        </>
-                    )}
-                    <div className="w-[1px] h-6 bg-foreground/25 my-auto mx-6" />
-                    <ShoppingCart>
-                        <Button
-                            size="icon"
-                            variant="outline"
-                        >
-                            <ShoppingCartIcon />
+            <div className="flex">
+                {session && session.user ? <UserButton /> : (
+                    <>
+                        <Button className="mr-2" asChild>
+                            <Link href="/sign-in">
+                                <span className="hidden md:inline">
+                                    Sign in
+                                </span>
+                                <LogInIcon className="md:hidden" />
+                                <span className="sr-only md:hidden">Sign ins</span>
+                            </Link>
                         </Button>
-                    </ShoppingCart>
-                </div>
+                        <Button variant="ghost" asChild>
+                            <Link href="/sign-up">
+                                <span className="hidden md:inline">
+                                    Sign up
+                                </span>
+                                <UserPlusIcon className="md:hidden" />
+                                <span className="sr-only md:hidden">Sign up</span>
+                            </Link>
+                        </Button>
+                    </>
+                )}
+                <div className="w-[1px] h-6 bg-foreground/25 my-auto mx-6" />
+                <ShoppingCart>
+                    <Button
+                        size="icon"
+                        variant="outline"
+                    >
+                        <ShoppingCartIcon />
+                    </Button>
+                </ShoppingCart>
+            </div>
         </header>
     )
 }

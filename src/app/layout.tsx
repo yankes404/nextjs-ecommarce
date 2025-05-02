@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { SessionProvider } from "next-auth/react";
 import { Inter } from "next/font/google";
+import { NuqsAdapter } from 'nuqs/adapters/next/app'
 
 import { cn } from "@/lib/utils"; 
 import { Toaster } from "@/components/ui/sonner";
@@ -24,16 +25,18 @@ export default function RootLayout({
   return (
     <SessionProvider>
       <Suspense>
-        <QueryProvider>
-          <html lang="en-US">
-            <body
-              className={cn(inter.className, "antialiased")}
-            >
-              <Toaster />
-              {children}
-            </body>
-          </html>
-        </QueryProvider>
+        <NuqsAdapter>
+          <QueryProvider>
+            <html lang="en-US">
+              <body
+                className={cn(inter.className, "antialiased")}
+              >
+                <Toaster />
+                {children}
+              </body>
+            </html>
+          </QueryProvider>
+        </NuqsAdapter>
       </Suspense>
     </SessionProvider>
   );
