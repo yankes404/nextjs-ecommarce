@@ -7,9 +7,9 @@ import { NuqsAdapter } from 'nuqs/adapters/next/app';
 import { cn } from "@/lib/utils"; 
 import { Toaster } from "@/components/ui/sonner";
 import { QueryProvider } from "@/components/query-provider";
+import { LoadingBar } from "@/components/loading-bar";
 
 import "./globals.css";
-import { LoadingBar } from "@/components/loading-bar";
 
 const inter = Inter({ subsets: ["latin"] });
 
