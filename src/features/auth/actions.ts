@@ -6,7 +6,7 @@ import * as bcrypt from "bcryptjs";
 import { auth, signIn } from "@/auth";
 import { prisma } from "@/lib/prisma";
 
-import { loginSchema, type LoginSchema, registerSchema, type RegisterSchema, settingsSchema, type SettingsSchema } from "./schemas";
+import { emailSchema, type EmailSchema, loginSchema, type LoginSchema, passwordSchema, type PasswordSchema, registerSchema, type RegisterSchema, settingsSchema, type SettingsSchema } from "./schemas";
 
 export const register = async (values: RegisterSchema) => {
     try {
@@ -155,6 +155,96 @@ export const updateSettings = async (values: SettingsSchema) => {
         });
     
         return { success: "You have been successfully updated" }
+    } catch (error) {
+        console.error(error);
+        return { error: "Something went wrong" }
+    }
+}
+
+export const createResetPasswordToken = async (values: EmailSchema) => {
+    try {
+        const validatedFields = emailSchema.safeParse(values);
+    
+        if (!validatedFields.success) {
+            return { error: "Invalid fields" }
+        }
+    
+        const {
+            email
+        } = validatedFields.data;
+    
+        const user = await prisma.user.findUnique({ where: { email } });
+    
+        if (!user) {
+            return { error: "User does not exist" }
+        }
+
+        const existingToken = await prisma.resetPasswordToken.findFirst({ where: { userId: user.id } });
+    
+        if (existingToken) {
+            if (existingToken.expiresAt > new Date()) {
+                return { error: "You have already requested a password reset" }
+            }
+    
+            await prisma.resetPasswordToken.deleteMany({ where: { userId: user.id } });
+        }
+    
+        await prisma.resetPasswordToken.create({
+            data: {
+                userId: user.id,
+                expiresAt: new Date(Date.now() + 1000 * 60 * 15)
+            }
+        });
+    
+        // TODO: Send email
+    
+        return { success: "We have sent you an email with a link to reset your password" }
+    } catch (error) {
+        console.error(error);
+        return { error: "Something went wrong" }
+    }
+}
+
+export const resetPassword =async  (token: string, values: PasswordSchema) => {
+    try {
+        const validatedFields = passwordSchema.safeParse(values);
+    
+        if (!validatedFields.success) {
+            return { error: "Invalid fields" }
+        }
+    
+        const {
+            password
+        } = validatedFields.data;
+    
+        const existingToken = await prisma.resetPasswordToken.findFirst({ where: { token } });
+    
+        if (!existingToken) {
+            return { error: "Invalid token" }
+        }
+    
+        if (existingToken.expiresAt < new Date()) {
+            return { error: "Token has expired" }
+        }
+    
+        const user = await prisma.user.findUnique({ where: { id: existingToken.userId } });
+    
+        if (!user) {
+            return { error: "User does not exist" }
+        }
+    
+        const hashedPassword = await bcrypt.hash(password, 10);
+    
+        await prisma.user.update({
+            where: { id: user.id },
+            data: {
+                password: hashedPassword
+            }
+        });
+    
+        await prisma.resetPasswordToken.deleteMany({ where: { userId: user.id } });
+    
+        return { success: "You have successfully reset your password" }
     } catch (error) {
         console.error(error);
         return { error: "Something went wrong" }

@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Hint } from "@/components/ui/extensions/hint";
@@ -12,6 +12,7 @@ import { Hint } from "@/components/ui/extensions/hint";
 import { useLogin } from "../api/use-login";
 import { useAuthError } from "../hooks/use-auth-error";
 import { loginSchema, type LoginSchema } from "../schemas";
+import Link from "next/link";
 
 export const SignInForm = () => {
     const { mutate: login, isPending } = useLogin();
@@ -70,6 +71,11 @@ export const SignInForm = () => {
                                     disabled={isPending}
                                 />
                             </FormControl>
+                            <FormDescription>
+                                <Link href="/reset-password" className="hover:text-black transition">
+                                    Forgot password
+                                </Link>
+                            </FormDescription>
                             <FormMessage />
                         </FormItem>
                     )}
