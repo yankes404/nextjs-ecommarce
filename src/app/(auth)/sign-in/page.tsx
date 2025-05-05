@@ -12,6 +12,7 @@ const SignUpPage = () => {
         <AuthCard
             title="Sign In"
             description="Sign in to your account"
+            showSocials
         >
             <SignInForm />
         </AuthCard>

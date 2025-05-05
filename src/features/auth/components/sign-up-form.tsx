@@ -6,12 +6,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Hint } from "@/components/ui/extensions/hint";
 
 import { useRegister } from "../api/use-register";
+import { useAuthError } from "../hooks/use-auth-error";
 import { registerSchema, type RegisterSchema } from "../schemas";
 
 export const SignUpForm = () => {
     const { mutate: register, isPending } = useRegister();
+    const error = useAuthError();
 
     const form = useForm<RegisterSchema>({
         resolver: zodResolver(registerSchema),
@@ -88,6 +91,11 @@ export const SignUpForm = () => {
                         </FormItem>
                     )}
                 />
+                {error && (
+                    <Hint variant="destructive">
+                        {error.message}
+                    </Hint>
+                )}
                 <Button
                     type="submit"
                     size="lg"

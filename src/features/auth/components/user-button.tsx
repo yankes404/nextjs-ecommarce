@@ -12,7 +12,7 @@ export const UserButton = () => {
 
     return session && session.user && (
         <DropdownMenu>
-            <DropdownMenuTrigger>
+            <DropdownMenuTrigger className="rounded-full">
                 <Avatar className="size-10 border shadow-sm">
                     <AvatarImage
                         src={session.user.image ?? ""}

@@ -1,5 +1,6 @@
 import { NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import Google from "next-auth/providers/google";
 import * as bcrypt from "bcryptjs";
 
 import { prisma } from "@/lib/prisma";
@@ -12,6 +13,7 @@ export default {
         signIn: "/sign-in"
     },
     providers: [
+        Google,
         Credentials({
             credentials: {
                 email: { type: "email", label: "Email" },
@@ -53,6 +55,11 @@ export default {
             }
 
             return session;
+        }
+    },
+    events: {
+        async linkAccount ({ user }) {
+            await prisma.user.update({ where: { id: user.id }, data: { emailVerified: new Date() } }).catch(() => {});
         }
     }
 } satisfies NextAuthConfig

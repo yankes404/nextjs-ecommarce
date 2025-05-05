@@ -7,13 +7,16 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Hint } from "@/components/ui/extensions/hint";
 
 import { useLogin } from "../api/use-login";
+import { useAuthError } from "../hooks/use-auth-error";
 import { loginSchema, type LoginSchema } from "../schemas";
 
 export const SignInForm = () => {
     const { mutate: login, isPending } = useLogin();
     const searchParams = useSearchParams();
+    const error = useAuthError();
 
     const form = useForm<LoginSchema>({
         resolver: zodResolver(loginSchema),
@@ -71,6 +74,11 @@ export const SignInForm = () => {
                         </FormItem>
                     )}
                 />
+                {error && (
+                    <Hint variant="destructive">
+                        {error.message}
+                    </Hint>
+                )}
                 <Button
                     type="submit"
                     size="lg"

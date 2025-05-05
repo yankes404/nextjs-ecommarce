@@ -11,7 +11,7 @@
 - Add security options for auth (email verification, 2fa code)
 - Add reset password functionality
 <!-- - Add user settings -->
-- Add google oauth
+<!-- - Add google oauth -->
 
 # Orders
 - Add more details to order e.g. shipping or deliveredAt

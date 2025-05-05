@@ -12,6 +12,7 @@ const SignUpPage = () => {
         <AuthCard
             title="Sign Up"
             description="Register to get up to 15% off on your first order"
+            showSocials
         >
             <SignUpForm />
         </AuthCard>
