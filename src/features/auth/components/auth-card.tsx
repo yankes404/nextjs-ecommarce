@@ -14,13 +14,15 @@ interface Props {
     description?: string;
     showSocials?: boolean;
     children: React.ReactNode;
+    footer?: React.ReactElement;
 }
 
 export const AuthCard = ({
     title,
     description,
     showSocials = false,
-    children
+    children,
+    footer
 }: Props) => {
     const searchParams = useSearchParams();
 
@@ -47,7 +49,7 @@ export const AuthCard = ({
                     <>
                         <div className="relative w-full my-6">
                             <Separator />
-                            <span className="inline-block text-sm uppercase text-muted-foreground font-medium absolute top-1/2 left-1/2 -translate-1/2 bg-background px-8">
+                            <span className="inline-block text-sm uppercase text-muted-foreground font-medium absolute top-1/2 left-1/2 -translate-1/2 bg-card px-8">
                                 Or
                             </span>
                         </div>
@@ -62,6 +64,7 @@ export const AuthCard = ({
                     </>
                 )}
             </CardContent>
+            {footer}
         </Card>
     )
 }

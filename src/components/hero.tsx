@@ -2,7 +2,7 @@ export const Hero = () => {
     return (
         <section
             id="hero"
-            className="w-screen p-4 sm:px-8 md:px-12 lg:px-16 xl:px-24 2xl:px-48 min-h-[548px] bg-muted flex flex-col gap-4 justify-center items-center"
+            className="w-screen p-4 sm:px-8 md:px-12 lg:px-16 xl:px-24 2xl:px-48 min-h-[548px] bg-muted dark:bg-background dark:border-b flex flex-col gap-4 justify-center items-center"
         >
             <h1 className="text-center text-3xl font-bold">
                 Welcome to BuyAnything

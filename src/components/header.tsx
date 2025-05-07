@@ -10,6 +10,7 @@ import { UserButton } from "@/features/auth/components/user-button";
 import { useShoppingCart } from "@/features/products/hooks/use-shopping-cart";
 
 import { Button } from "./ui/button";
+import { ThemeSelect } from "./theme-select";
 
 type Props = Omit<React.ComponentProps<"header">, "children">;
 
@@ -54,11 +55,13 @@ export const Header = ({ className, ...props }: Props) => {
                     </>
                 )}
                 <div className="w-[1px] h-6 bg-foreground/25 my-auto mx-6" />
+                <ThemeSelect />
                 <ShoppingCart>
                     <Button
                         size="icon"
                         variant="outline"
                         disabled={isClient ? isShoppingCartLoading : true}
+                        className="ml-2"
                     >
                         <ShoppingCartIcon />
                     </Button>

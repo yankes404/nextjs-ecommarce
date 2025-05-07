@@ -3,7 +3,7 @@
 <!-- - Add caching for shopping cart products -->
 <!-- - Add stacking for shopping cart products -->
 <!-- - Add loading & not found page -->
-- Add dark theme
+<!-- - Add dark theme -->
 - Add feedbacks
 - Add search filters
 

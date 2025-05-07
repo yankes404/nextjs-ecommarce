@@ -17,7 +17,7 @@ const HomePage = async () => {
 
   return (
     <div className="min-h-svh flex flex-col">
-      <Header className="bg-muted" />
+      <Header className="bg-muted dark:bg-background" />
       <Hero />
       <main className="py-10 px-4 sm:px-8 md:px-12 lg:px-16 xl:px-24 2xl:px-48 grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {products.map(product => <ProductCard key={product.id} {...product} />)}
