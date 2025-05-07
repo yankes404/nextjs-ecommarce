@@ -7,14 +7,18 @@ import { type Product } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 
 import { useShoppingCart } from "../hooks/use-shopping-cart";
+import { ChangeProductCountModal } from "./change-product-count-modal";
 
 export const ShoppingCartProductCard = ({
-    index,
+    count,
+    id,
     name,
     price,
     images
-}: Product & { index: number; }) => {
-    const { removeProduct } = useShoppingCart();
+}: Product & { count: number; }) => {
+    const { removeProduct, changeProductCount } = useShoppingCart();
+
+    const onCountChange = (count: number) => changeProductCount(id, count);
 
     return (
         <div
@@ -33,15 +37,30 @@ export const ShoppingCartProductCard = ({
                 <h3 className="font-bold text-lg line-clamp-1">
                     {name}
                 </h3>
-                <p className="text-sm text-muted-foreground">
-                    ${price.toLocaleString("en-US")}
-                </p>
+                <div className="flex items-center gap-2.5">
+                    <ChangeProductCountModal
+                        initialCount={count}
+                        onCountChange={onCountChange}
+                    >
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            className="px-3 h-7"
+                        >
+                            {count.toLocaleString("en-US")}
+                        </Button>
+                    </ChangeProductCountModal>
+                    <div className="size-0.5 rounded-full bg-foreground shrink-0" />
+                    <p className="text-sm text-muted-foreground">
+                        ${price.toLocaleString("en-US")}
+                    </p>
+                </div>
             </div>
             <Button
                 size="icon"
                 variant="outline"
                 className="ml-auto"
-                onClick={() => removeProduct(index)}
+                onClick={() => removeProduct(id)}
             >
                 <Trash2Icon />
             </Button>

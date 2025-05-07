@@ -1,70 +1,124 @@
 'use client'
 
-import { useEffect } from "react";
+import { useCallback } from "react";
 import { create } from "zustand";
 import { toast } from "sonner";
 import { Product } from "@prisma/client";
+import { useQueries, UseQueryResult } from "@tanstack/react-query";
 
-import { getProductsByIds } from "../actions";
+import { getProductById } from "../actions";
 
-interface ShoppingCartStore {
-    products: Product[];
-    setProducts: (products: Product[]) => void;
+function getStoredProductIds(): ProductId[] {
+    try {
+        let storedProductsIds = JSON.parse(localStorage.getItem("products") || "[]");
+
+        if (!Array.isArray(storedProductsIds)) {
+            storedProductsIds = [];
+        }
+
+        return storedProductsIds.filter((obj: unknown) => {
+            return obj && typeof obj === "object" && "id" in obj && typeof obj.id === "string" && "count" in obj && typeof obj.count === "number";
+        }) as ProductId[];
+    } catch {
+        return [];
+    }
 }
 
-const useShoppingCartStore = create<ShoppingCartStore>((set) => ({
-    products: [],
-    setProducts: (products) => set({ products }),
+interface ProductId {
+    id: string;
+    count: number;
+}
+
+interface Store {
+    productIds: ProductId[];
+    setProductIds: (productIds: ProductId[]) => void;
+}
+
+const store = create<Store>((set) => ({
+    productIds: getStoredProductIds(),
+    setProductIds: (productIds) => set({ productIds }),
 }));
 
+const STALE_TIME = 30 * 60 * 1000;
+const CACHE_TIME = 35 * 60 * 1000;
+
 export const useShoppingCart = () => {
-    const { products, setProducts } = useShoppingCartStore();
+    const { productIds, setProductIds } = store();
 
-    const addProduct = (product: Product) => {
-        const newProducts = [...products, product];
-        setProducts(newProducts);
-        localStorage.setItem("products", JSON.stringify(newProducts.map((product) => product.id)));
+    const addProduct = useCallback((productId: string) => {
+        let newProducts = [...productIds];
 
-        toast.success(`${product.name} added to cart`);
-    }
+        const existingProduct = productIds.find((p) => p.id === productId);
 
-    const removeProduct = (index: number) => {
-        const updatedProducts = products.filter((_, i) => i !== index);
-        setProducts(updatedProducts);
-        localStorage.setItem("products", JSON.stringify(updatedProducts.map((product) => product.id)));
-
-        toast.success(`${products[index].name} removed from cart`);
-    }
-
-    useEffect(() => {
-        try {
-            let storedProductsIds = JSON.parse(localStorage.getItem("products") || "[]");
-            if (!Array.isArray(storedProductsIds)) {
-                storedProductsIds = [];
+        if (existingProduct) {
+            if (existingProduct.count > 99) {
+                toast.error("You can't add more than 99 products");
+                return;
             }
 
-            const productsIds: string[] = storedProductsIds.filter((id: unknown) => typeof id === "string").map((id: string) => id as string);
-
-            if (productsIds.length > 0) {
-                getProductsByIds(productsIds).then((products) => {
-                    const countedProducts = products.map((p) => {
-                        const count = storedProductsIds.filter((id: string) => id === p.id).length;
-                        return { ...p, count };
-                    });
-
-                    const muliplicatedProducts = countedProducts.reduce((acc, p) => [...acc, ...Array(p.count).fill(p)], [] as Product[]);
-
-                    setProducts(muliplicatedProducts);
-                });
-            }
-        } catch (error) {
-            console.error(error);
+            newProducts = productIds.map((p) => {
+                if (p.id === productId) {
+                    return { ...p, count: p.count + 1 };
+                } else {
+                    return p;
+                }
+            });
+        } else {
+            newProducts.push({ id: productId, count: 1 });
         }
-    }, [setProducts]);
+        
+        localStorage.setItem("products", JSON.stringify(newProducts));
+        toast.success("Product added to cart");
+
+        setProductIds(newProducts);
+    }, [productIds, setProductIds]);
+
+    const removeProduct = useCallback((id: string) => {
+        const newProducts = productIds.filter((p) => p.id !== id);
+
+        localStorage.setItem("products", JSON.stringify(newProducts));
+        toast.success("Product removed from cart");
+
+        setProductIds(newProducts);
+    }, [productIds, setProductIds]);
+
+    const changeProductCount = useCallback((id: string, count: number) => {
+        const newProducts = productIds.map((p) => {
+            if (p.id === id) {
+                return { ...p, count };
+            } else {
+                return p;
+            }
+        });
+
+        localStorage.setItem("products", JSON.stringify(newProducts));
+        toast.success("Product count changed");
+
+        setProductIds(newProducts);
+    }, [productIds, setProductIds]);
+
+    const productQueries = useQueries({
+        queries: productIds.map((obj) => ({
+            queryKey: ["product", obj.id],
+            queryFn: () => getProductById(obj.id),
+            staleTime: STALE_TIME,
+            cacheTime: CACHE_TIME,
+        })),
+    }) as UseQueryResult<Product>[];
+
+    const isLoading = productQueries.some((q) => q.isLoading) ?? false;
+    const products = productQueries
+        .filter((q) => q.status === "success" && q.data)
+        .map((q) => ({
+            ...q.data!,
+            count: productIds.find((p) => p.id === q.data!.id)!.count
+        }) as Product & { count: number });
 
     return {
         products,
+        isLoading,
         addProduct,
-        removeProduct
+        removeProduct,
+        changeProductCount
     };
-};
+}

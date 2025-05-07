@@ -8,7 +8,9 @@ import { Separator } from "@/components/ui/separator";
 import { useShoppingCart } from "../hooks/use-shopping-cart";
 
 export const ProductDetails = (product: Product) => {
-    const { addProduct } = useShoppingCart();
+    const isClient = typeof window !== "undefined";
+
+    const { addProduct, isLoading } = useShoppingCart();
 
     return (
         <div className="grid -order-1 md:order-1">
@@ -32,7 +34,8 @@ export const ProductDetails = (product: Product) => {
                 <Button
                     size="lg"
                     variant="outline"
-                    onClick={() => addProduct(product)}
+                    onClick={() => addProduct(product.id)}
+                    disabled={isClient ? isLoading : true}
                 >
                     Add to cart
                 </Button>

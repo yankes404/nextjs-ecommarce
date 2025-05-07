@@ -6,14 +6,18 @@ import { LogInIcon, ShoppingCartIcon, UserPlusIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { ShoppingCart } from "@/features/products/components/shopping-cart";
+import { UserButton } from "@/features/auth/components/user-button";
+import { useShoppingCart } from "@/features/products/hooks/use-shopping-cart";
 
 import { Button } from "./ui/button";
-import { UserButton } from "@/features/auth/components/user-button";
 
 type Props = Omit<React.ComponentProps<"header">, "children">;
 
 export const Header = ({ className, ...props }: Props) => {
+    const isClient = typeof window !== "undefined";
+
     const { data: session } = useSession();
+    const { isLoading: isShoppingCartLoading } = useShoppingCart();
 
     return (
         <header
@@ -54,6 +58,7 @@ export const Header = ({ className, ...props }: Props) => {
                     <Button
                         size="icon"
                         variant="outline"
+                        disabled={isClient ? isShoppingCartLoading : true}
                     >
                         <ShoppingCartIcon />
                     </Button>
