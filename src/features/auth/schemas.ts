@@ -17,6 +17,9 @@ export const registerSchema = z.object({
 export const loginSchema = z.object({
     email,
     password: z.string().min(1, "Required"),
+    twoFACode: z.optional(z.string().trim().refine((value) => {
+        return value.length === 0 || (value.length === 6 && /^\d+$/.test(value));
+    }, "Code is invalid"))
 });
 
 export const settingsSchema = z.object({
@@ -25,7 +28,7 @@ export const settingsSchema = z.object({
     password: z.optional(z.string().trim().max(64, "At most 64 characters are allowed").refine((value) => {
         return value.length === 0 || value.length >= 6
     }, "At least 6 characters are required")),
-    twoFA: z.boolean({ invalid_type_error: "Required" })
+    twoFAEnabled: z.boolean({ invalid_type_error: "Required" })
 });
 
 export type EmailSchema = z.infer<typeof emailSchema>;

@@ -94,7 +94,7 @@ export const SettingsForm = ({ defaultValues }: Props) => {
                 />
                 <FormField
                     control={form.control}
-                    name="twoFA"
+                    name="twoFAEnabled"
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>

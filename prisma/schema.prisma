@@ -21,7 +21,8 @@ model User {
   emailVerified       DateTime?
   image               String?
   password            String?
-  twoFA               Boolean         @default(false)
+  twoFAEnabled        Boolean         @default(false)
+  twoFACode           TwoFACode?
   accounts            Account[]
  
   createdAt DateTime @default(now())
@@ -85,4 +86,12 @@ model EmailVerificationToken {
   token           String    @unique @default(cuid())
   expiresAt       DateTime
   requestedEmail  String?
+}
+
+model TwoFACode {
+  userId    String    @id
+  code      String
+  expiresAt DateTime
+
+  user User @relation(references: [id], fields: [userId])
 }

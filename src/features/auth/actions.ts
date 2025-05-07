@@ -70,10 +70,11 @@ export const login = async (values: LoginSchema) => {
 
         const {
             email,
-            password
+            password,
+            twoFACode
         } = validatedFields.data;
 
-        await signIn("credentials", { email, password, redirect: false });
+        await signIn("credentials", { email, password, twoFACode, redirect: false });
         
         return { success: "You have been successfully logged in", redirect: true }
     } catch (error) {
@@ -89,6 +90,10 @@ export const login = async (values: LoginSchema) => {
 
                     if (error.code === "EmailVerificationTokenSent") {
                         return { success: "You have not verified email address. We have sent you a verification email, check your inbox" }
+                    }
+
+                    if (error.code === "TwoFACodeSent") {
+                        return { twoFACodeSent: true }
                     }
                 }
 
@@ -118,7 +123,7 @@ export const getSettings = async () => {
         const settings = {
             name: user.name,
             email: user.email,
-            twoFA: user.twoFA
+            twoFAEnabled: user.twoFAEnabled
         }
     
         return { settings }
@@ -146,7 +151,7 @@ export const updateSettings = async (values: SettingsSchema) => {
             name,
             email,
             password,
-            twoFA
+            twoFAEnabled
         } = validatedFields.data;
     
         const user = await prisma.user.findUnique({ where: { id: session.user.id } });
@@ -190,7 +195,7 @@ export const updateSettings = async (values: SettingsSchema) => {
             data: {
                 name,
                 password: hashedPassword,
-                twoFA
+                twoFAEnabled
             }
         });
     

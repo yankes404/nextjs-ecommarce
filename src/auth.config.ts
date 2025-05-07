@@ -4,14 +4,19 @@ import Google from "next-auth/providers/google";
 import * as bcrypt from "bcryptjs";
 
 import { prisma } from "@/lib/prisma";
+import { generateCode } from "@/lib/utils";
 
 class EmailNotVerifiedError extends CredentialsSignin {
     code = "EmailNotVerifiedError"
+}
 
-}  
 class EmailVerificationTokenSent extends CredentialsSignin {
     code = "EmailVerificationTokenSent"
 }  
+
+class TwoFACodeSent extends CredentialsSignin {
+    code = "TwoFACodeSent"
+}
 
 export default {
     session: {
@@ -26,12 +31,15 @@ export default {
             credentials: {
                 email: { type: "email", label: "Email" },
                 password: { type: "password", label: "Password" },
+                twoFACode: { type: "text", label: "2FA Code" }
             },
-            async authorize ({ email, password }) {
+            async authorize ({ email, password, twoFACode: code }) {
                 if (!email || !password) return null;
                 if (typeof email !== "string" || typeof password !== "string") return null;
 
-                const user = await prisma.user.findUnique({ where: { email } });
+                const twoFACode = code as string | null;
+
+                const user = await prisma.user.findUnique({ where: { email }, include: { twoFACode: true } });
 
                 if (!user?.emailVerified) { // && process.env.NODE_ENV === "production"
                     const existingToken = await prisma.emailVerificationToken.findFirst({ where: { email } });
@@ -52,12 +60,43 @@ export default {
                     throw new EmailNotVerifiedError();
                 }
 
-                if (user && user.password) {
-                    const isPasswordsCompare = await bcrypt.compare(password, user.password);
-                    if (isPasswordsCompare) return user;
+                if (!user || !user.password) return null;
+
+                const isPasswordCompare = await bcrypt.compare(password, user.password);
+                if (!isPasswordCompare) return null;
+
+                if (user.twoFAEnabled) {
+                    if (!user.twoFACode || user.twoFACode.expiresAt < new Date()) {
+                        await prisma.twoFACode.deleteMany({ where: { userId: user.id } });
+
+                        const code = generateCode();
+                        const expirationDate = new Date(Date.now() + 1000 * 60 * 15);
+
+                        await prisma.twoFACode.create({
+                            data: {
+                                userId: user.id,
+                                code,
+                                expiresAt: expirationDate
+                            }
+                        });
+
+                        // TODO: Send email
+                        
+                        throw new TwoFACodeSent();
+                    }
+
+                    if (!twoFACode) {
+                        throw new TwoFACodeSent();
+                    }
+
+                    if (user.twoFACode.code !== twoFACode) {
+                        return null;
+                    }
+
+                    await prisma.twoFACode.deleteMany({ where: { userId: user.id } });
                 }
 
-                return null;      
+                return user;
             }
         })
     ],

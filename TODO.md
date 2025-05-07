@@ -9,7 +9,7 @@
 
 # Auth
 <!-- - Email Verification -->
-- Add 2FA
+<!-- - Add 2FA -->
 <!-- - Add reset password functionality -->
 <!-- - Add user settings -->
 <!-- - Add google oauth -->
