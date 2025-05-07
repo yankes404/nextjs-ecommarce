@@ -11,10 +11,15 @@ export const useUpdateSettings = () => {
 
     const mutation = useMutation({
         mutationFn: (values: SettingsSchema) => updateSettings(values),
-        onSuccess: ({ success, error }, values) => {
+        onSuccess: ({ success, isEmailChanged, error }, values) => {
             if (success) {
-                update({ email: values.email, name: values.name });
+                update({ name: values.name });
+                
                 toast.success(success);
+                if (isEmailChanged) {
+                    toast.success("We sent you an email to verify your new email address.");
+                }
+
                 queryClient.invalidateQueries({ queryKey: ["user-settings"] });
             }
     

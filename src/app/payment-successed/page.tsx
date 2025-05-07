@@ -1,7 +1,7 @@
-import { Footer } from "@/components/footer";
-import { Header } from "@/components/header";
 import { retrieveSessionStatus } from "@/features/payments/actions";
 import { PaymentStatusCard } from "@/features/payments/components/payment-status-card";
+import { Footer } from "@/components/footer";
+import { Header } from "@/components/header";
 
 interface Props {
     searchParams: Promise<{ id: string | null }>;

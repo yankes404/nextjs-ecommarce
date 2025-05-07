@@ -8,7 +8,8 @@
 - Add search filters
 
 # Auth
-- Add security options for auth (email verification, 2fa code)
+<!-- - Email Verification -->
+- Add 2FA
 <!-- - Add reset password functionality -->
 <!-- - Add user settings -->
 <!-- - Add google oauth -->

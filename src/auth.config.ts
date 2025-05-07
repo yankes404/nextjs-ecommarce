@@ -1,9 +1,17 @@
-import { NextAuthConfig } from "next-auth";
+import { NextAuthConfig, CredentialsSignin } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 import * as bcrypt from "bcryptjs";
 
 import { prisma } from "@/lib/prisma";
+
+class EmailNotVerifiedError extends CredentialsSignin {
+    code = "EmailNotVerifiedError"
+
+}  
+class EmailVerificationTokenSent extends CredentialsSignin {
+    code = "EmailVerificationTokenSent"
+}  
 
 export default {
     session: {
@@ -24,6 +32,25 @@ export default {
                 if (typeof email !== "string" || typeof password !== "string") return null;
 
                 const user = await prisma.user.findUnique({ where: { email } });
+
+                if (!user?.emailVerified) { // && process.env.NODE_ENV === "production"
+                    const existingToken = await prisma.emailVerificationToken.findFirst({ where: { email } });
+                    if (!existingToken || existingToken.expiresAt < new Date()) {
+                        await prisma.emailVerificationToken.deleteMany({ where: { email } });
+                        await prisma.emailVerificationToken.create({
+                            data: {
+                                email,
+                                expiresAt: new Date(Date.now() + 1000 * 60 * 15)
+                            }
+                        });
+
+                        // TODO: Send verification email
+
+                        throw new EmailVerificationTokenSent();
+                    }
+
+                    throw new EmailNotVerifiedError();
+                }
 
                 if (user && user.password) {
                     const isPasswordsCompare = await bcrypt.compare(password, user.password);

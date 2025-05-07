@@ -38,6 +38,21 @@ export const register = async (values: RegisterSchema) => {
             }
         });
 
+        const existingToken = await prisma.emailVerificationToken.findFirst({ where: { email } });
+
+        if (existingToken && existingToken.expiresAt > new Date()) {
+            await prisma.emailVerificationToken.deleteMany({ where: { email } });
+        }
+
+        await prisma.emailVerificationToken.create({
+            data: {
+                email,
+                expiresAt: new Date(Date.now() + 1000 * 60 * 15)
+            }
+        });
+
+        // TODO: Send verification email
+
         return { success: "You have been successfully registered" }
     } catch (error) {
         console.error(error);
@@ -60,13 +75,23 @@ export const login = async (values: LoginSchema) => {
 
         await signIn("credentials", { email, password, redirect: false });
         
-        return { success: "You have been successfully logged in" }
+        return { success: "You have been successfully logged in", redirect: true }
     } catch (error) {
         console.error(error);
 
         if (error instanceof AuthError) {
             // @ts-expect-error: error might not be typed as CredentialsSignin
             if (error.type === "CredentialsSignin")  {
+                if ('code' in error) {
+                    if (error.code === "EmailNotVerifiedError") {
+                        return { error: "You have not verified your email" }
+                    }
+
+                    if (error.code === "EmailVerificationTokenSent") {
+                        return { success: "You have not verified email address. We have sent you a verification email, check your inbox" }
+                    }
+                }
+
                 return { error: "Invalid Credentials" }
             }
         }
@@ -133,7 +158,23 @@ export const updateSettings = async (values: SettingsSchema) => {
         const isEmailChanged = email !== user.email;
     
         if (isEmailChanged) {
-            await prisma.order.updateMany({ where: { customerEmail: user.email }, data: { customerEmail: email } });
+            const existingUser = await prisma.user.findUnique({ where: { email } });
+    
+            if (existingUser) {
+                return { error: "User with that email address already exists" }
+            }
+
+            const existingToken = await prisma.emailVerificationToken.findFirst({ where: { email: user.email, requestedEmail: email } });
+            if (!existingToken || existingToken.expiresAt < new Date()) {
+                await prisma.emailVerificationToken.deleteMany({ where: { email: user.email, requestedEmail: email } });
+                await prisma.emailVerificationToken.create({
+                    data: {
+                        email: user.email,
+                        requestedEmail: email,
+                        expiresAt: new Date(Date.now() + 1000 * 60 * 15)
+                    }
+                });
+            }
 
             // TODO: Send email confirmation
         }
@@ -148,13 +189,12 @@ export const updateSettings = async (values: SettingsSchema) => {
             where: { id: user.id },
             data: {
                 name,
-                email,
                 password: hashedPassword,
                 twoFA
             }
         });
     
-        return { success: "You have been successfully updated" }
+        return { success: "Check your inbox to verify your email address", isEmailChanged }
     } catch (error) {
         console.error(error);
         return { error: "Something went wrong" }
@@ -245,6 +285,55 @@ export const resetPassword =async  (token: string, values: PasswordSchema) => {
         await prisma.resetPasswordToken.deleteMany({ where: { userId: user.id } });
     
         return { success: "You have successfully reset your password" }
+    } catch (error) {
+        console.error(error);
+        return { error: "Something went wrong" }
+    }
+}
+
+export const verifyEmail = async (token: string) => {
+    try {
+        const tokenData = token ? await prisma.emailVerificationToken.findFirst({ where: { token } }) : null;
+    
+        if (!tokenData) {
+            return { error: "Invalid token" }
+        }
+    
+        if (tokenData.expiresAt < new Date()) {
+            prisma.emailVerificationToken.deleteMany({ where: { token } });
+            return { error: "Token has expired" }
+        }
+    
+        const user = await prisma.user.findUnique({ where: { email: tokenData.email } });
+        if (!user) {
+            prisma.emailVerificationToken.deleteMany({ where: { token } });
+            return { error: "Token's user does not exist" }
+        }
+    
+        if (tokenData.requestedEmail) {
+            const existingUser = await prisma.user.findUnique({ where: { email: tokenData.requestedEmail } });
+            if (existingUser) {
+                prisma.emailVerificationToken.deleteMany({ where: { token } });
+                return { error: "Email what you want to change is already in use" }
+            }
+        }
+    
+        const newEmail = tokenData.requestedEmail ?? undefined;
+    
+        await prisma.user.update({
+            where: { id: user.id },
+            data: {
+                email: newEmail,
+                emailVerified: new Date()
+            }
+        });
+        if (tokenData.requestedEmail) {
+            await prisma.order.updateMany({ where: { customerEmail: user.email }, data: { customerEmail: tokenData.requestedEmail } });
+        }
+        
+        await prisma.emailVerificationToken.deleteMany({ where: { token } });
+    
+        return { success: "You have successfully verified your email", newEmail }
     } catch (error) {
         console.error(error);
         return { error: "Something went wrong" }

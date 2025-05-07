@@ -16,11 +16,13 @@ export const useLogin = () => {
             if (data.success) {
                 toast.success(data.success);
 
-                const callbackUrl = searchParams.get('callback_url') ?? DEFAULT_LOGIN_REDIRECT;
-                router.push(callbackUrl);
-
-                // NOTE: I not refresh with router, because when i hard reload page session will be loaded correctly
-                window.location.reload();
+                if (data.redirect) {
+                    const callbackUrl = searchParams.get('callback_url') ?? DEFAULT_LOGIN_REDIRECT;
+                    router.push(callbackUrl);
+    
+                    // NOTE: I not refresh with router, because when i hard reload page session will be loaded correctly
+                    window.location.reload();
+                }
             }
 
             if (data.error) {

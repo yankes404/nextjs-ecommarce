@@ -5,6 +5,8 @@ import { AuthCard } from "@/features/auth/components/auth-card";
 import { CreateResetPasswordTokenForm } from "@/features/auth/components/create-reset-password-token-form";
 import { ResetPasswordForm } from "@/features/auth/components/reset-password-form";
 
+export const revalidate = 1800;
+
 export const metadata: Metadata = {
     title: "Reset Password - BuyAnything"
 }

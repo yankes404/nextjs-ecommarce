@@ -79,3 +79,10 @@ model ResetPasswordToken {
   token     String    @unique @default(cuid())
   expiresAt DateTime
 }
+
+model EmailVerificationToken {
+  email           String    @id
+  token           String    @unique @default(cuid())
+  expiresAt       DateTime
+  requestedEmail  String?
+}

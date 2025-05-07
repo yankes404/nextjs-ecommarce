@@ -1,13 +1,13 @@
 import { type Metadata } from "next";
+import Link from "next/link";
+import { HomeIcon, XCircleIcon } from "lucide-react";
 
 import { getProductById } from "@/features/products/actions";
 import { ProductImages } from "@/features/products/components/product-images";
+import { ProductDetails } from "@/features/products/components/product-details";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { Button } from "@/components/ui/button";
-import { ProductDetails } from "@/features/products/components/product-details";
-import { HomeIcon, XCircleIcon } from "lucide-react";
-import Link from "next/link";
 
 export const revalidate = 1800;
 

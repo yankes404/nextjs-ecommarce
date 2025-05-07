@@ -1,8 +1,11 @@
 import { type Metadata } from "next";
 
-import { DashboardClient } from "./client";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+
+import { DashboardClient } from "./client";
+
+export const revalidate = 1800;
 
 export const metadata: Metadata = {
     title: "Customer Dashboard - BuyAnything"
