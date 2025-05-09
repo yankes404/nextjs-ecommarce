@@ -1,6 +1,6 @@
 import NextAuth from "next-auth";
 
-import { API_ROUTE_PREFIX, AUTH_ROUTES, PROTECTED_ROUTES, DEFAULT_LOGIN_REDIRECT } from "@/routes";
+import { API_ROUTE_PREFIX, AUTH_ROUTES, PROTECTED_ROUTES, DEFAULT_LOGIN_REDIRECT, ADMIN_ROUTES } from "@/routes";
 import authConfig from "@/auth.config";
 
 const { auth } = NextAuth(authConfig);
@@ -11,6 +11,7 @@ export default auth(async(req) => {
 
     const isApiRoute = nextUrl.pathname.startsWith(API_ROUTE_PREFIX);
     const isAuthRoute = AUTH_ROUTES.some((route) => nextUrl.pathname.startsWith(route));
+    const isAdminRoute = ADMIN_ROUTES.some((route) => nextUrl.pathname.startsWith(route));
     const isProtectedRoute = PROTECTED_ROUTES.some((route) => nextUrl.pathname.startsWith(route));
 
     if (isApiRoute) return;
@@ -22,6 +23,10 @@ export default auth(async(req) => {
 
     if (isProtectedRoute && !isLoggedIn) {
         return Response.redirect(new URL("/sign-in", nextUrl));
+    }
+
+    if (isAdminRoute && !isLoggedIn && req.auth?.user?.role !== "ADMIN") {
+        return Response.redirect(new URL(isLoggedIn ? "/" : "/sign-in", nextUrl));
     }
 });
 

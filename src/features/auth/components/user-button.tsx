@@ -13,7 +13,7 @@ export const UserButton = () => {
 
     return session && session.user && (
         <DropdownMenu>
-            <DropdownMenuTrigger className="rounded-full">
+            <DropdownMenuTrigger className="rounded-full size-10">
                 <UserImage
                     image={session.user.image}
                     name={session.user.name}
@@ -29,12 +29,14 @@ export const UserButton = () => {
                         Customer Dashboard
                     </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                    <Link href="/admin">
-                        <ShieldIcon />
-                        Admin Dashboard
-                    </Link>
-                </DropdownMenuItem>
+                {session.user.role === "ADMIN" && (
+                    <DropdownMenuItem asChild>
+                        <Link href="/admin/users">
+                            <ShieldIcon />
+                            Admin Dashboard
+                        </Link>
+                    </DropdownMenuItem>
+                )}
                 <DropdownMenuItem onClick={() => signOut()} variant="destructive">
                     <LogOutIcon />
                     Logout
