@@ -14,6 +14,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserRole {
+  USER
+  ADMIN
+}
+
 model User {
   id                  String          @id @default(cuid())
   name                String
@@ -21,9 +26,11 @@ model User {
   emailVerified       DateTime?
   image               String?
   password            String?
+  role                UserRole        @default(USER)
   twoFAEnabled        Boolean         @default(false)
   twoFACode           TwoFACode?
   accounts            Account[]
+  feedbacks           Feedback[]
  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -58,6 +65,7 @@ model Product {
   price       Float
   images      String[]  @default([])
   orders      Order[]
+  feedbacks   Feedback[]
 }
 
 enum OrderStatus {
@@ -94,4 +102,19 @@ model TwoFACode {
   expiresAt DateTime
 
   user User @relation(references: [id], fields: [userId])
+}
+
+model Feedback {
+  id        String  @id @default(cuid())
+  stars     Int
+  content   String
+  isEdited  Boolean @default(false)
+  isHidden  Boolean @default(false)
+  userId    String
+  productId String
+
+  user    User    @relation(references: [id], fields: [userId])
+  product Product @relation(references: [id], fields: [productId])
+
+  createdAt DateTime @default(now())
 }

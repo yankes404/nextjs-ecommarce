@@ -1,10 +1,11 @@
-import { NextAuthConfig, CredentialsSignin } from "next-auth";
+import { NextAuthConfig, CredentialsSignin, DefaultSession } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 import * as bcrypt from "bcryptjs";
 
 import { prisma } from "@/lib/prisma";
 import { generateCode } from "@/lib/utils";
+import { User, UserRole } from "@prisma/client";
 
 class EmailNotVerifiedError extends CredentialsSignin {
     code = "EmailNotVerifiedError"
@@ -16,6 +17,17 @@ class EmailVerificationTokenSent extends CredentialsSignin {
 
 class TwoFACodeSent extends CredentialsSignin {
     code = "TwoFACodeSent"
+}
+
+declare module "next-auth" {
+    interface Session {
+      user: {
+        role: string
+      } & DefaultSession["user"]
+    }
+    interface User {
+      role: UserRole
+    }
 }
 
 export default {
@@ -101,10 +113,12 @@ export default {
         })
     ],
     callbacks: {
-        jwt({ token, trigger, session }) {
-            if (trigger === "update") {
-                // console.log(session);
+        jwt({ token, trigger, session, user }) {
+            if (user) {
+                token.role = (user as User).role;
+            }
 
+            if (trigger === "update") {
                 if (session.email) {
                     token.email = session.email;
                 }
@@ -116,8 +130,14 @@ export default {
             return token;
         },
         session({ session, token }) {
-            if (token && token.sub) {
-                session.user.id = token.sub;
+            if (token) {
+                if (token.sub) {
+                    session.user.id = token.sub;
+                }
+
+                if (token.role) {
+                    session.user.role = token.role as UserRole;
+                }
             }
 
             return session;

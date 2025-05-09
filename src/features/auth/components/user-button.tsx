@@ -5,7 +5,8 @@ import { useSession, signOut } from "next-auth/react";
 import { LayoutDashboardIcon, LogOutIcon, ShieldIcon } from "lucide-react";
 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
+import { UserImage } from "./user-image";
 
 export const UserButton = () => {
     const { data: session } = useSession();
@@ -13,15 +14,10 @@ export const UserButton = () => {
     return session && session.user && (
         <DropdownMenu>
             <DropdownMenuTrigger className="rounded-full">
-                <Avatar className="size-10 border shadow-sm">
-                    <AvatarImage
-                        src={session.user.image ?? ""}
-                        alt={session.user.name!}
-                    />
-                    <AvatarFallback className="text-sm font-medium bg-foreground/5">
-                        {session.user.name?.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                </Avatar>
+                <UserImage
+                    image={session.user.image}
+                    name={session.user.name}
+                />
             </DropdownMenuTrigger>
             <DropdownMenuContent
                 sideOffset={10}
