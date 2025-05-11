@@ -28,7 +28,7 @@ export const POST = async (req: NextRequest) => {
                 }
             );
 
-            console.log(session);
+            // console.log(session);
     
             const customerEmail = session.customer_email ?? session.customer_details?.email;
             const lineItems = session.line_items?.data;

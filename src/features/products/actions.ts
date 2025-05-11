@@ -3,7 +3,107 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 
-import { type FeedbackSchema, feedbackSchema } from "./schemas";
+import { type FeedbackSchema, feedbackSchema, productCategorySchema, ProductCategorySchema } from "./schemas";
+
+export const getProductCategories = async () => {
+    const categories = await prisma.productCategory.findMany();
+    return categories;
+}
+
+export const getProductsByCategoryId = async (categoryId: string) => {
+    const products = prisma.product.findMany({ where: { category: { id: categoryId } } });
+    return products;
+}
+
+export const createProductCategory = async (values: ProductCategorySchema) => {
+    try {
+        const session = await auth();
+
+        if (!session || !session.user || session.user.role !== "ADMIN") {
+            return { error: "You are not allowed to do this" }
+        }
+
+        const validatedFields = productCategorySchema.safeParse(values);
+    
+        if (!validatedFields.success) {
+            return { error: "Invalid fields" }
+        }
+    
+        const { slug, name } = validatedFields.data;
+
+        if (slug.match(/\s/) || slug !== slug.toLowerCase()) {
+            return { error: "Slug must be lowercase and without white characters" }
+        }
+
+        const existingCategory = await prisma.productCategory.findUnique({ where: { slug } });
+    
+        if (existingCategory) {
+            return { error: "Slug must be unique" }
+        }
+    
+        await prisma.productCategory.create({ data: { slug, name } });
+        return { success: "Category has been created successfully" }
+    } catch (error) {
+        console.error(error);
+        return { error: "Something went wrong" }
+    }
+}
+
+export const editProductCategory = async (id: string, values: ProductCategorySchema) => {
+    try {
+        const session = await auth();
+
+        if (!session || !session.user || session.user.role !== "ADMIN") {
+            return { error: "You are not allowed to do this" }
+        }
+
+        const validatedFields = productCategorySchema.safeParse(values);
+    
+        if (!validatedFields.success) {
+            return { error: "Invalid fields" }
+        }
+    
+        const { slug, name } = validatedFields.data;
+
+        if (slug.match(/\s/) || slug !== slug.toLowerCase()) {
+            return { error: "Slug must be lowercase and without white characters" }
+        }
+
+        const existingCategory = await prisma.productCategory.findUnique({ where: { id } });
+    
+        if (!existingCategory) {
+            return { error: "Category does not exist" }
+        }
+    
+        await prisma.productCategory.update({ where: { id }, data: { slug, name } });
+        return { success: "Category has been updated successfully" }
+    } catch (error) {
+        console.error(error);
+        return { error: "Something went wrong" }
+    }
+}
+
+export const deleteProductCategory = async (id: string) => {
+    try {
+        const session = await auth();
+
+        if (!session || !session.user || session.user.role !== "ADMIN") {
+            return { error: "You are not allowed to do this" }
+        }
+
+        const existingCategory = await prisma.productCategory.findUnique({ where: { id } });
+    
+        if (!existingCategory) {
+            return { error: "Category does not exist" }
+        }
+
+        await prisma.productCategory.delete({ where: { id } });
+        return { success: "Category has been deleted successfully" }
+    } catch (error) {
+        console.error(error);
+        return { error: "Something went wrong" }
+    }
+}
 
 export const getProducts = async () => {
     const products = await prisma.product.findMany();

@@ -17,13 +17,15 @@ interface Props <T>{
         placeholder: string;
     };
     showSelected?: boolean;
+    buttons?: React.ReactNode;
 }
 
 export const DataTable = <T, >({
     data,
     columns,
     searchInput,
-    showSelected
+    showSelected,
+    buttons
 }: Props<T>) => {
     const [sorting, setSorting] = useState<SortingState>([])
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
@@ -54,43 +56,46 @@ export const DataTable = <T, >({
    
     return (
         <div className="w-full">
-            <div className="flex items-center py-4">
-            {searchInput && (
-                <Input
-                    placeholder={searchInput.placeholder}
-                    value={(table.getColumn(searchInput.accessorKey)?.getFilterValue() as string) ?? ""}
-                    onChange={(event) =>
-                    table.getColumn(searchInput.accessorKey)?.setFilterValue(event.target.value)
-                    }
-                    className="max-w-sm"
-                />
-            )}
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="ml-auto">
-                    Columns <ChevronDownIcon />
-                </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                {table
-                    .getAllColumns()
-                    .filter((column) => column.getCanHide())
-                    .map((column) => {
-                    return (
-                        <DropdownMenuCheckboxItem
-                        key={column.id}
-                        className="capitalize"
-                        checked={column.getIsVisible()}
-                        onCheckedChange={(value) =>
-                            column.toggleVisibility(!!value)
+            <div className="flex items-center justify-between gap-4 py-4">
+                {searchInput && (
+                    <Input
+                        placeholder={searchInput.placeholder}
+                        value={(table.getColumn(searchInput.accessorKey)?.getFilterValue() as string) ?? ""}
+                        onChange={(event) =>
+                        table.getColumn(searchInput.accessorKey)?.setFilterValue(event.target.value)
                         }
-                        >
-                        {column.id}
-                        </DropdownMenuCheckboxItem>
-                    )
-                    })}
-                </DropdownMenuContent>
-            </DropdownMenu>
+                        className="max-w-sm"
+                    />
+                )}
+                <div className="flex gap-2">
+                    {buttons}
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" className="ml-auto">
+                                Columns <ChevronDownIcon />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            {table
+                            .getAllColumns()
+                            .filter((column) => column.getCanHide())
+                            .map((column) => {
+                                return (
+                                    <DropdownMenuCheckboxItem
+                                        key={column.id}
+                                        className="capitalize"
+                                        checked={column.getIsVisible()}
+                                        onCheckedChange={(value) =>
+                                            column.toggleVisibility(!!value)
+                                        }
+                                    >
+                                        {column.id}
+                                    </DropdownMenuCheckboxItem>
+                                )
+                            })}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
             </div>
             <div className="rounded-md border">
             <Table>
