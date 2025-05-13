@@ -3,7 +3,7 @@ import Link from "next/link";
 import { type Product } from "@prisma/client";
 
 type Props = Product & {
-    href: string;
+    href?: string;
 }
 
 export const ProductCard = ({
