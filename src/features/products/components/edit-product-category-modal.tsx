@@ -14,7 +14,11 @@ import { productCategorySchema, type ProductCategorySchema } from "../schemas";
 import { useEditProductCategoryModal } from "../hooks/use-edit-product-category-modal";
 import { useEditProductCategory } from "../api/use-edit-product-category";
 
-export const EditProductCategoryModal = () => {
+interface Props {
+    onSuccess?: (values: ProductCategorySchema) => void;
+}
+
+export const EditProductCategoryModal = ({ onSuccess }: Props) => {
     const { isOpen, productCategory, open, close } = useEditProductCategoryModal();
 
     const onOpenChange = (isOpen: boolean) => (isOpen && productCategory) ? open(productCategory) : close();
@@ -45,6 +49,7 @@ export const EditProductCategoryModal = () => {
         }, {
             onSuccess: ({ success }) => {
                 if (success) {
+                    onSuccess?.(values);
                     form.reset();
                     close();
                 }

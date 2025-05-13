@@ -1,5 +1,6 @@
 'use client'
 
+import { useDeleteProductCategory } from "@/features/products/api/use-delete-product-category";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -12,16 +13,19 @@ import {
 } from "@/components/ui/alert-dialog";
 
 import { useDeleteProductCategoryModal } from "../../products/hooks/use-delete-product-category-modal";
-import { useDeleteProductCategory } from "@/features/products/api/use-delete-product-category";
 
-export const DeleteProductCategoryModal = () => {
+interface Props {
+    onSuccess?: () => void;
+}
+
+export const DeleteProductCategoryModal = ({ onSuccess }: Props) => {
     const { mutate, isPending } = useDeleteProductCategory();
 
     const { isOpen, open, close, productCategoryId } = useDeleteProductCategoryModal();
 
     const onOpenChange = (isOpen: boolean) => (isOpen && productCategoryId) ? open(productCategoryId) : (!isPending && close());
 
-    const deleteProductCategory = () => productCategoryId && mutate({ productCategoryId });
+    const deleteProductCategory = () => productCategoryId && mutate({ productCategoryId }, { onSuccess: ({ success }) => success && onSuccess?.() });
 
     return (
         <AlertDialog

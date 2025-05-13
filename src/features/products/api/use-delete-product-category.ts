@@ -14,6 +14,7 @@ export const useDeleteProductCategory = () => {
         onSuccess: ({ success, error }) => {
             if (success) {
                 queryClient.invalidateQueries({ queryKey: ["product-categories"] });
+                queryClient.invalidateQueries({ queryKey: ["product-category"] });
                 toast.success(success);
             }
 

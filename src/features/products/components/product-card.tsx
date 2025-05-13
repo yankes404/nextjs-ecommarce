@@ -1,16 +1,21 @@
-import { type Product } from "@prisma/client";
 import Image from "next/image";
 import Link from "next/link";
+import { type Product } from "@prisma/client";
+
+type Props = Product & {
+    href: string;
+}
 
 export const ProductCard = ({
     id,
     name,
     price,
-    images
-}: Product) => {
+    images,
+    href = "/products/{ID}"
+}: Props) => {
     return (
         <Link
-            href={`/products/${id}`}
+            href={href.replaceAll("{ID}", id)}
             className="p-5 rounded-xl border hover:-translate-y-1 hover:shadow-xs transition flex flex-col justify-end gap-2.5"
         >
             {images.length > 0 && (

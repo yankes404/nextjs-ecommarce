@@ -3,7 +3,12 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 
-import { type FeedbackSchema, feedbackSchema, productCategorySchema, ProductCategorySchema } from "./schemas";
+import { type FeedbackSchema, feedbackSchema, productCategorySchema, type ProductCategorySchema, productSchema, type ProductSchema } from "./schemas";
+
+export const getProductCategoryBySlug = async (slug: string, withProducts = false) => {
+    const category = await prisma.productCategory.findUnique({ where: { slug }, include: { products: withProducts } });
+    return category;
+}
 
 export const getProductCategories = async () => {
     const categories = await prisma.productCategory.findMany();
@@ -30,10 +35,6 @@ export const createProductCategory = async (values: ProductCategorySchema) => {
         }
     
         const { slug, name } = validatedFields.data;
-
-        if (slug.match(/\s/) || slug !== slug.toLowerCase()) {
-            return { error: "Slug must be lowercase and without white characters" }
-        }
 
         const existingCategory = await prisma.productCategory.findUnique({ where: { slug } });
     
@@ -64,10 +65,6 @@ export const editProductCategory = async (id: string, values: ProductCategorySch
         }
     
         const { slug, name } = validatedFields.data;
-
-        if (slug.match(/\s/) || slug !== slug.toLowerCase()) {
-            return { error: "Slug must be lowercase and without white characters" }
-        }
 
         const existingCategory = await prisma.productCategory.findUnique({ where: { id } });
     
@@ -126,6 +123,129 @@ export const getProductsByIds = async (ids: string[]) => {
 export const getProductsByStripeIds = async (ids: string[]) => {
     const products = await prisma.product.findMany({ where: { stripeId: { in: ids } } });
     return products;
+}
+
+export const createProduct = async (values: ProductSchema) => {
+    try {
+        const session = await auth();
+
+        if (!session || !session.user || session.user.role !== "ADMIN") {
+            return { error: "You are not allowed to do this" }
+        }
+
+        const validatedFields = productSchema.safeParse(values);
+    
+        if (!validatedFields.success) {
+            return { error: "Invalid fields" }
+        }
+    
+        const {
+            name,
+            slug,
+            stripeId,
+            price,
+            description,
+            categoryId
+        } = validatedFields.data;
+
+        const existingProduct = await prisma.product.findFirst({ where: { OR: [{ stripeId }, { slug }] } });
+
+        if (existingProduct) {
+            return { error: "Slug or Stripe ID already in use" }
+        }
+
+        const category = await prisma.productCategory.findUnique({ where: { id: categoryId } });
+
+        if (!category) {
+            return { error: "Category does not exist" }
+        }
+
+        await prisma.product.create({
+            data: {
+                name,
+                slug,
+                stripeId,
+                price,
+                description,
+                categoryId: category.id
+            }
+        });
+
+        return { success: "Product has been created successfully" }
+    } catch (error) {
+        console.error(error);
+        return { error: "Something went wrong" }
+    }
+}
+
+export const editProduct = async (
+    id: string,
+    values: ProductSchema
+) => {
+    try {
+        const session = await auth();
+
+        if (!session || !session.user || session.user.role !== "ADMIN") {
+            return { error: "You are not allowed to do this" }
+        }
+
+        const validatedFields = productSchema.safeParse(values);
+    
+        if (!validatedFields.success) {
+            return { error: "Invalid fields" }
+        }
+    
+        const {
+            name,
+            slug,
+            stripeId,
+            price,
+            description,
+            categoryId
+        } = validatedFields.data;
+
+        const existingProduct = await prisma.product.findUnique({ where: { id } });
+    
+        if (!existingProduct) {
+            return { error: "Product does not exist" }
+        }
+
+        const category = await prisma.productCategory.findUnique({ where: { id: categoryId } });
+
+        if (!category) {
+            return { error: "Category does not exist" }
+        }
+
+        await prisma.product.update({ where: { id }, data: { name, slug, stripeId, price, description, categoryId: category.id } });
+
+        return { success: "Product has been updated successfully" }
+    } catch (error) {
+        console.error(error);
+        return { error: "Something went wrong" }
+    }
+}
+
+export const deleteProduct = async (id: string) => {
+    try {
+        const session = await auth();
+
+        if (!session || !session.user || session.user.role !== "ADMIN") {
+            return { error: "You are not allowed to do this" }
+        }
+
+        const product = await prisma.product.findUnique({ where: { id } });
+
+        if (!product) {
+            return { error: "Product does not exist" }
+        }
+
+        await prisma.product.delete({ where: { id } });
+
+        return { success: "Product has been deleted successfully" }
+    } catch (error) {
+        console.error(error);
+        return { error: "Something went wrong" }
+    }
 }
 
 export const getProductFeedbacks = async (productId: string) => {

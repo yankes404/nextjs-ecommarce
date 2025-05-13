@@ -70,6 +70,7 @@ model ProductCategory {
 
 model Product {
   id          String    @id @default(cuid())
+  slug        String    @unique
   stripeId    String    @unique
   name        String
   description String

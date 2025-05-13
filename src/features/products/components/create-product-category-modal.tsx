@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { useCreateProductCategory } from "../api/use-create-product-category";
 import { useCreateProductCategoryModal } from "../hooks/use-create-product-category-modal";
 import { productCategorySchema, type ProductCategorySchema } from "../schemas";
+import { SlugInput } from "@/components/ui/extensions/slug-input";
 
 export const CreateProductCategoryModal = () => {
     const { mutate, isPending } = useCreateProductCategory();
@@ -25,10 +26,6 @@ export const CreateProductCategoryModal = () => {
             slug: "",
         }
     });
-
-    const onSlugChange = (value: string) => {
-        form.setValue("slug", value.replaceAll(" ", "-").toLowerCase());
-    }
 
     const onSubmit = (values: ProductCategorySchema) => {
         mutate(values, {
@@ -60,12 +57,10 @@ export const CreateProductCategoryModal = () => {
                                     <FormLabel>
                                         Slug
                                     </FormLabel>
-                                    <FormControl>
-                                        <Input
+                                    <FormControl {...field}>
+                                        <SlugInput
                                             placeholder="Enter unique slug..."
                                             disabled={isPending}
-                                            {...field}
-                                            onChange={(e) => onSlugChange(e.target.value)}
                                         />
                                     </FormControl>
                                     <FormMessage />
