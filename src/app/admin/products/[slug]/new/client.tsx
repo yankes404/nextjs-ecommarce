@@ -1,19 +1,19 @@
 'use client'
 
-import { ProductCategory } from "@prisma/client";
-
-import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb";
 import { useForm } from "react-hook-form";
-import { productSchema, ProductSchema } from "@/features/products/schemas";
+import { ProductCategory } from "@prisma/client";
 import { zodResolver } from "@hookform/resolvers/zod";
+
+import { isNumber } from "@/lib/utils";
+import { productSchema, ProductSchema } from "@/features/products/schemas";
 import { useCreateProduct } from "@/features/products/api/use-create-product";
+import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { SlugInput } from "@/components/ui/extensions/slug-input";
 import { Button } from "@/components/ui/button";
-import { isNumber } from "@/lib/utils";
-import { DollarSignIcon } from "lucide-react";
+import { PriceInput } from "@/components/ui/extensions/price-input";
 
 interface Props {
     category: ProductCategory;
@@ -126,19 +126,11 @@ export const NewProductClient = ({ category }: Props) => {
                                     Price
                                 </FormLabel>
                                 <FormControl>
-                                    <div className="relative w-full">
-                                        <DollarSignIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-4 shrink-0"/>
-                                        <Input
-                                            type="number"
-                                            placeholder="0.00"
-                                            min={1}
-                                            max={Number.MAX_SAFE_INTEGER}
-                                            disabled={isPending}
-                                            {...field}
-                                            className="ps-10"
-                                            onChange={(e) => field.onChange(isNumber(e.currentTarget.valueAsNumber) ? e.currentTarget.valueAsNumber : "")}
-                                        />
-                                    </div>
+                                    <PriceInput
+                                        value={isNumber(field.value) ? field.value : 0}
+                                        onValueChange={(value) => field.onChange(isNumber(value) ? value : 0)}
+                                        disabled={isPending}
+                                    />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
