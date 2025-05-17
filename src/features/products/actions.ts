@@ -125,6 +125,11 @@ export const getProductsByStripeIds = async (ids: string[]) => {
     return products;
 }
 
+export const getProductBySlug = async (slug: string) => {
+    const product = await prisma.product.findUnique({ where: { slug }, include: { category: true } });
+    return product;
+}
+
 export const createProduct = async (values: ProductSchema) => {
     try {
         const session = await auth();
@@ -233,7 +238,7 @@ export const deleteProduct = async (id: string) => {
             return { error: "You are not allowed to do this" }
         }
 
-        const product = await prisma.product.findUnique({ where: { id } });
+        const product = await prisma.product.findUnique({ where: { id }, include: { category: true } });
 
         if (!product) {
             return { error: "Product does not exist" }
@@ -241,7 +246,7 @@ export const deleteProduct = async (id: string) => {
 
         await prisma.product.delete({ where: { id } });
 
-        return { success: "Product has been deleted successfully" }
+        return { success: "Product has been deleted successfully", product }
     } catch (error) {
         console.error(error);
         return { error: "Something went wrong" }

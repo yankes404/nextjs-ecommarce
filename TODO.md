@@ -16,3 +16,11 @@
 
 # Orders
 - Add more details to order e.g. shipping or deliveredAt
+
+# Admin
+
+## New Product Page
+- Add price input
+- Add better description textarea
+- Add images input
+- Sync with stripe using webhooks

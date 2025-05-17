@@ -5,7 +5,7 @@ import { LoaderIcon, PlusIcon } from "lucide-react";
 import { DataTable } from "@/features/admin/components/data-table";
 import { productCategoryColumns } from "@/features/admin/components/product-category-columns";
 import { useProductsCategories } from "@/features/products/api/use-product-categories";
-import { DeleteProductCategoryModal } from "@/features/admin/components/delete-product-category-modal";
+import { DeleteProductCategoryModal } from "@/features/products/components/delete-product-category-modal";
 import { CreateProductCategoryModal } from "@/features/products/components/create-product-category-modal";
 import { useCreateProductCategoryModal } from "@/features/products/hooks/use-create-product-category-modal";
 import { EditProductCategoryModal } from "@/features/products/components/edit-product-category-modal";

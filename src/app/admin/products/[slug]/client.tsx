@@ -7,7 +7,7 @@ import { useDebounce } from "use-debounce";
 import { PenIcon, PlusIcon, TrashIcon } from "lucide-react";
 
 import { EditProductCategoryModal } from "@/features/products/components/edit-product-category-modal";
-import { DeleteProductCategoryModal } from "@/features/admin/components/delete-product-category-modal";
+import { DeleteProductCategoryModal } from "@/features/products/components/delete-product-category-modal";
 import { useEditProductCategoryModal } from "@/features/products/hooks/use-edit-product-category-modal";
 import { useDeleteProductCategoryModal } from "@/features/products/hooks/use-delete-product-category-modal";
 import { useProductCategoryBySlug } from "@/features/products/api/use-product-category-by-slug";
@@ -54,7 +54,7 @@ const NotFound = () => {
     return (
         <div className="w-full h-svh flex flex-col items-center justify-center gap-2.5">
             <h1 className="text-xl font-bold">
-                Product not found
+                Product Category not found
             </h1>
             <Button
                 size="lg"
@@ -150,7 +150,7 @@ export const ProductsSlugClient = ({ slug }: Props) => {
                     {filteredProducts.map((product) => (
                         <ProductCard
                             key={product.id}
-                            href={`/admin/products/${slug}/{ID}`}
+                            href={`/admin/products/${slug}/{SLUG}`}
                             {...product}
                         />
                     ))}

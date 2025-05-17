@@ -1,6 +1,5 @@
 'use client'
 
-import { useDeleteProductCategory } from "@/features/products/api/use-delete-product-category";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -12,20 +11,21 @@ import {
     AlertDialogTitle
 } from "@/components/ui/alert-dialog";
 
-import { useDeleteProductCategoryModal } from "../../products/hooks/use-delete-product-category-modal";
+import { useDeleteProductModal } from "../hooks/use-delete-product-modal";
+import { useDeleteProduct } from "../api/use-delete-product";
 
 interface Props {
     onSuccess?: () => void;
 }
 
-export const DeleteProductCategoryModal = ({ onSuccess }: Props) => {
-    const { mutate, isPending } = useDeleteProductCategory();
+export const DeleteProductModal = ({ onSuccess }: Props) => {
+    const { mutate, isPending } = useDeleteProduct();
 
-    const { isOpen, open, close, productCategoryId } = useDeleteProductCategoryModal();
+    const { isOpen, open, close, productId } = useDeleteProductModal();
 
-    const onOpenChange = (isOpen: boolean) => (isOpen && productCategoryId) ? open(productCategoryId) : (!isPending && close());
+    const onOpenChange = (isOpen: boolean) => (isOpen && productId) ? open(productId) : (!isPending && close());
 
-    const deleteProductCategory = () => productCategoryId && mutate({ productCategoryId }, { onSuccess: ({ success }) => success && onSuccess?.() });
+    const deleteProduct = () => productId && mutate(productId, { onSuccess: ({ success }) => success && onSuccess?.() });
 
     return (
         <AlertDialog
@@ -37,7 +37,7 @@ export const DeleteProductCategoryModal = ({ onSuccess }: Props) => {
                 <AlertDialogHeader>
                     <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                     <AlertDialogDescription>
-                        This action cannot be undone. This will permanently delete the product category.
+                        This action cannot be undone. This will permanently delete this product from our database.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -45,7 +45,7 @@ export const DeleteProductCategoryModal = ({ onSuccess }: Props) => {
                         Cancel
                     </AlertDialogCancel>
                     <AlertDialogAction
-                        onClick={deleteProductCategory}
+                        onClick={deleteProduct}
                         disabled={isPending}
                     >
                         Delete
