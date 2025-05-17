@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 
 import { ProductSlugClient } from "./client";
 
+export const revalidate = 1800;
+
 interface Props {
     params: Promise<{ slug: string; productSlug: string }>
 }
